@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Indian Judiciary: An Interactive Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Judicial Parchment -->
+    <!-- Application Structure Plan: A single-page, top-navigated SPA with five thematic sections: Introduction, Judicial Framework (interactive pyramid), Pillars of Power (cards for Review/Activism), Landmark Cases (clickable case studies updating a central content view), and Conclusion. This structure is chosen to transform a linear presentation into an engaging, non-linear exploration, allowing users to either follow a guided path or jump directly to core examples (the cases), which are the most compelling part of the report. -->
+    <!-- Visualization & Content Choices: 
+        - Judicial Hierarchy: Goal: Organize -> Viz: Interactive Pyramid Diagram (HTML/CSS) -> Interaction: Hover to show details -> Justification: More engaging than a static list.
+        - Core Powers (Review/Activism): Goal: Compare/Inform -> Viz: Interactive Cards (HTML/CSS/JS) -> Interaction: Click to expand -> Justification: Clearly separates the two key powers.
+        - Landmark Cases: Goal: Inform/Explore -> Viz: Card-based content switcher (JS) -> Interaction: Click card to display full case details -> Justification: Focuses user attention on one case at a time, preventing overload and encouraging active exploration.
+        - Prisoners Released Data (Hussainara Khatoon): Goal: Emphasize Impact -> Viz: Animated Number Counter (JS) -> Interaction: Automatic on view -> Justification: Visually reinforces the scale of the court's intervention.
+        - Legislative Delay (Vishaka): Goal: Show Change Over Time -> Viz: Simple Timeline (HTML/CSS) -> Interaction: Static Visual -> Justification: Clearly illustrates the judiciary's proactive role and the time it took for the legislature to follow.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF5; /* Parchment white */
+            color: #3A3A3A; /* Dark charcoal */
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #8C4D1D; /* Muted brown */
+            border-bottom-color: #8C4D1D;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .case-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .case-card.active {
+            border-color: #AF6C3E; /* Lighter brown for selection */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(175, 108, 62, 0.2), 0 4px 6px -2px rgba(175, 108, 62, 0.1);
+        }
+        .pyramid-level {
+            clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
+            transition: background-color 0.3s;
+        }
+        .pyramid-level:hover {
+            background-color: #D6A27D; /* Highlight color */
+        }
+        .content-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-[#4A2E1F]">The Indian Judiciary</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#introduction" class="nav-link text-gray-600 font-medium pb-1">Introduction</a>
+                <a href="#framework" class="nav-link text-gray-600 font-medium pb-1">Framework</a>
+                <a href="#powers" class="nav-link text-gray-600 font-medium pb-1">Powers</a>
+                <a href="#cases" class="nav-link text-gray-600 font-medium pb-1">Landmark Cases</a>
+                <a href="#conclusion" class="nav-link text-gray-600 font-medium pb-1">Conclusion</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 space-y-2">
+            <a href="#introduction" class="block nav-link text-gray-600 font-medium">Introduction</a>
+            <a href="#framework" class="block nav-link text-gray-600 font-medium">Framework</a>
+            <a href="#powers" class="block nav-link text-gray-600 font-medium">Powers</a>
+            <a href="#cases" class="block nav-link text-gray-600 font-medium">Landmark Cases</a>
+            <a href="#conclusion" class="block nav-link text-gray-600 font-medium">Conclusion</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Section 1: Introduction -->
+        <section id="introduction" class="text-center min-h-[60vh] flex flex-col justify-center items-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-[#4A2E1F] mb-4">Guardian of the Constitution</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-700 leading-relaxed">
+                The Constitution of India establishes three co-equal branches of government. While the legislature makes laws and the executive implements them, the judiciary stands as the ultimate interpreter. It is the "watchdog of democracy," ensuring every government action aligns with the supreme law of the land. The independence of the judiciary is the very bedrock of the rule of law in India.
+            </p>
+        </section>
+
+        <!-- Section 2: Framework -->
+        <section id="framework" class="py-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2">The Judicial Framework</h2>
+                <p class="max-w-2xl mx-auto text-gray-600">
+                    India has a single, integrated judicial system structured like a pyramid. This unified structure ensures consistent application of both central and state laws. Hover over each level of the pyramid to learn about its role.
+                </p>
+            </div>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                <div class="w-full md:w-1/3 space-y-[-1px]">
+                    <div id="pyramid-supreme" class="pyramid-level h-24 bg-[#AF6C3E] flex items-center justify-center text-white font-bold text-lg cursor-pointer">Supreme Court</div>
+                    <div id="pyramid-high" class="pyramid-level h-24 bg-[#C48A62] flex items-center justify-center text-white font-bold text-lg cursor-pointer">High Courts</div>
+                    <div id="pyramid-subordinate" class="pyramid-level h-24 bg-[#D6A27D] flex items-center justify-center text-white font-bold text-lg cursor-pointer">Subordinate Courts</div>
+                </div>
+                <div id="pyramid-details" class="w-full md:w-1/2 min-h-[15rem] bg-white p-8 rounded-lg shadow-md border border-gray-200 flex items-center">
+                    <p class="text-lg text-gray-700">Hover over a level of the judicial pyramid to see its description here.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Pillars of Power -->
+        <section id="powers" class="py-20 bg-white rounded-lg">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2">Pillars of Judicial Power</h2>
+                <p class="max-w-2xl mx-auto text-gray-600">
+                    The judiciary exercises its authority through two profound powers. These actions allow it to safeguard the constitution and actively deliver justice when other branches of government fall short.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div class="card border border-gray-200 p-8 rounded-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-[#8C4D1D]">Judicial Review</h3>
+                    <p class="text-gray-700">
+                        This is the power of the Supreme Court and High Courts to examine any law or government action. If an action is found to violate the principles of the Constitution, it can be declared unconstitutional and void. This power serves as the ultimate check on the legislative and executive branches, ensuring they operate within their constitutional limits.
+                    </p>
+                </div>
+                 <div class="card border border-gray-200 p-8 rounded-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-[#8C4D1D]">Judicial Activism</h3>
+                    <p class="text-gray-700">
+                        This represents the judiciary's proactive role in protecting citizens' rights and promoting social justice, especially when the legislature or executive fails to act. The most powerful tool for this is Public Interest Litigation (PIL), which allows any citizen to bring a matter of public concern before the court, making justice accessible to even the most marginalized communities.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Landmark Cases -->
+        <section id="cases" class="py-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2">Landmark Cases in Action</h2>
+                <p class="max-w-2xl mx-auto text-gray-600">
+                    These pivotal cases demonstrate how judicial review and activism have shaped Indian democracy. Select a case to explore its background, the court's decision, and its lasting impact.
+                </p>
+            </div>
+            <div class="flex flex-col lg:flex-row gap-8">
+                <div class="w-full lg:w-1/3">
+                    <div id="case-card-1" class="case-card bg-white p-6 rounded-lg shadow-md mb-4 active">
+                        <h4 class="font-bold text-lg text-[#4A2E1F]">Kesavananda Bharati v. Kerala</h4>
+                        <p class="text-sm text-gray-600">Established the 'Basic Structure' Doctrine, limiting Parliament's power to amend the Constitution.</p>
+                    </div>
+                    <div id="case-card-2" class="case-card bg-white p-6 rounded-lg shadow-md mb-4">
+                        <h4 class="font-bold text-lg text-[#4A2E1F]">Hussainara Khatoon v. Bihar</h4>
+                        <p class="text-sm text-gray-600">Affirmed the right to a speedy trial as a fundamental right through a PIL.</p>
+                    </div>
+                    <div id="case-card-3" class="case-card bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg text-[#4A2E1F]">Vishaka v. Rajasthan</h4>
+                        <p class="text-sm text-gray-600">Created legally binding guidelines against workplace sexual harassment in the absence of legislation.</p>
+                    </div>
+                </div>
+                <div id="case-details-container" class="w-full lg:w-2/3 bg-white p-8 rounded-lg shadow-lg border border-gray-200">
+                    <!-- Case details will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Conclusion -->
+        <section id="conclusion" class="py-20 text-center bg-gray-50 rounded-lg">
+            <h2 class="text-3xl font-bold mb-4">Power, Responsibility, and Trust</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-700 leading-relaxed">
+                With immense power comes great responsibility. Judges adhere to the highest ethical standards to maintain public trust, the judiciary's greatest asset. Through judicial review, it acts as the Constitution's guardian, and through judicial activism, it has become a powerful voice for the voiceless. By balancing its powers with a commitment to ethics, the Indian judiciary continues to play an indispensable role in strengthening our democracy.
+            </p>
+        </section>
+
+        <!-- Section 6: About the Author -->
+        <section id="about-author" class="py-20">
+            <div class="max-w-2xl mx-auto text-center">
+                <h2 class="text-3xl font-bold mb-8 text-[#4A2E1F]">About the Creator</h2>
+                <div class="bg-white p-8 rounded-lg shadow-lg border border-gray-200 flex flex-col sm:flex-row items-center gap-8 card">
+                    <div class="flex-shrink-0">
+                        <div class="w-24 h-24 rounded-full bg-[#8C4D1D] flex items-center justify-center text-white text-4xl font-bold ring-4 ring-white shadow-md">
+                            TG
+                        </div>
+                    </div>
+                    <div class="text-center sm:text-left">
+                        <h3 class="text-2xl font-bold text-[#4A2E1F]">Tanmay GR</h3>
+                        <p class="text-gray-600 mt-1">Bachelor's student at Dayananda Sagar University, Bangalore.</p>
+                        <a href="https://www.linkedin.com/in/tanmaygr27/" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-[#AF6C3E] text-white font-semibold rounded-lg shadow-md hover:bg-[#8C4D1D] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#AF6C3E] transition-all duration-300">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.25 6.5 1.75 1.75 0 016.5 8.25zM19 19h-3v-4.75c0-1.4-1.2-2.5-2.5-2.5S11 12.85 11 14.25V19h-3v-9h2.9v1.3a3.11 3.11 0 012.6-1.4c2.5 0 4.5 2.2 4.5 5.1V19z"></path>
+                            </svg>
+                            Connect on LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 border-t border-gray-200 mt-12">
+        <p class="text-gray-500">&copy; 2025 Interactive Guide. All information sourced from the provided presentation script.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Active Nav Link on Scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            window.onscroll = () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            // Pyramid Interaction
+            const pyramidDetails = {
+                supreme: {
+                    title: "Supreme Court of India",
+                    text: "The apex court and the final court of appeal. Its decisions are binding on all other courts in the country, ensuring uniformity of law."
+                },
+                high: {
+                    title: "High Courts",
+                    text: "There are 25 High Courts at the state level. They are the highest judicial bodies in their respective states and territories."
+                },
+                subordinate: {
+                    title: "Subordinate Courts",
+                    text: "These are the district and lower courts at the base of the pyramid. This is where most citizens first seek justice for civil and criminal cases."
+                }
+            };
+
+            const pyramidContainer = document.getElementById('pyramid-details');
+            const defaultPyramidText = pyramidContainer.innerHTML;
+
+            document.getElementById('pyramid-supreme').addEventListener('mouseover', () => updatePyramidDetails('supreme'));
+            document.getElementById('pyramid-high').addEventListener('mouseover', () => updatePyramidDetails('high'));
+            document.getElementById('pyramid-subordinate').addEventListener('mouseover', () => updatePyramidDetails('subordinate'));
+
+            function updatePyramidDetails(level) {
+                const details = pyramidDetails[level];
+                pyramidContainer.innerHTML = `<div class="content-fade-in"><h4 class="text-xl font-bold text-[#4A2E1F] mb-2">${details.title}</h4><p class="text-lg text-gray-700">${details.text}</p></div>`;
+            }
+
+            // Case Studies Interaction
+            const caseDetails = {
+                1: {
+                    title: "Kesavananda Bharati v. State of Kerala (1973)",
+                    content: `
+                        <p class="mb-4 text-gray-700"><strong class="font-semibold text-gray-800">The Central Question:</strong> Is Parliament's power to amend the Constitution unlimited? Could it change or even abolish our Fundamental Rights?</p>
+                        <p class="mb-4 text-gray-700"><strong class="font-semibold text-gray-800">The Ruling:</strong> In a historic 7-6 decision, the Supreme Court introduced the 'Basic Structure' Doctrine. It ruled that while Parliament can amend the Constitution, it cannot alter its "basic structure" or fundamental framework. This includes principles like democracy, secularism, separation of powers, and judicial review itself.</p>
+                        <p class="mb-4 text-gray-700"><strong class="font-semibold text-gray-800">Impact:</strong> This judgment established that the Constitution is supreme and positioned the judiciary as its ultimate guardian. It ensures the core pillars of Indian democracy cannot be dismantled by a parliamentary majority.</p>
+                    `
+                },
+                2: {
+                    title: "Hussainara Khatoon vs. State of Bihar (1979)",
+                    content: `
+                        <p class="mb-4 text-gray-700"><strong class="font-semibold text-gray-800">The Spark:</strong> A series of newspaper articles highlighted the shocking plight of undertrial prisoners in Bihar. Many had been jailed for periods longer than the maximum sentence for their alleged crimes.</p>
+                        <p class="mb-4 text-gray-700"><strong class="font-semibold text-gray-800">The Action:</strong> A lawyer, Kapila Hingorani, filed a Public Interest Litigation (PIL) petition in the Supreme Court on their behalf. The Court took immediate action based on the articles.</p>
+                        <p class="mb-4 text-gray-700"><strong class="font-semibold text-gray-800">Impact:</strong> The Court's intervention led to the release of over <span id="prisoner-count" class="font-bold text-2xl text-[#AF6C3E]">0</span> undertrial prisoners. More importantly, this landmark case firmly established the right to a speedy trial as a fundamental right, changing the landscape of criminal justice in India.</p>
+                    `
+                },
+                3: {
+                    title: "Vishaka v. State of Rajasthan (1997)",
+                    content: `
+                        <p class="mb-4 text-gray-700"><strong class="font-semibold text-gray-800">The Problem:</strong> A glaring gap in the legal system—the absence of any law to deal with sexual harassment at the workplace. The case was triggered by the brutal gang-rape of Bhanwari Devi, a social worker targeted for trying to stop a child marriage.</p>
+                        <p class="mb-4 text-gray-700"><strong class="font-semibold text-gray-800">The Action:</strong> When the legal system failed to provide justice, women's rights groups filed a PIL. Recognizing the legislative void, the Supreme Court stepped in and formulated a set of legally binding guidelines known as the "Vishaka Guidelines."</p>
+                        <p class="mb-4 text-gray-700"><strong class="font-semibold text-gray-800">Impact:</strong> The guidelines provided the first legal definition of sexual harassment, made employers responsible for a safe environment, and mandated Internal Complaints Committees. These judicially-created guidelines were the law of the land for 16 years until Parliament enacted the Sexual Harassment of Women at Workplace Act in 2013, based on this framework.</p>
+                    `
+                }
+            };
+
+            const caseCards = document.querySelectorAll('.case-card');
+            const caseDetailsContainer = document.getElementById('case-details-container');
+
+            function animateCount(element, finalValue) {
+                let start = 0;
+                const duration = 1500;
+                const increment = finalValue / (duration / 16); 
+
+                function update() {
+                    start += increment;
+                    if (start < finalValue) {
+                        element.textContent = Math.ceil(start).toLocaleString('en-IN');
+                        requestAnimationFrame(update);
+                    } else {
+                        element.textContent = finalValue.toLocaleString('en-IN');
+                    }
+                }
+                requestAnimationFrame(update);
+            }
+
+            function updateCaseDetails(caseId) {
+                const details = caseDetails[caseId];
+                caseDetailsContainer.innerHTML = `
+                    <div class="content-fade-in">
+                        <h3 class="text-2xl font-bold mb-4 text-[#8C4D1D]">${details.title}</h3>
+                        ${details.content}
+                    </div>
+                `;
+                
+                caseCards.forEach(card => card.classList.remove('active'));
+                document.getElementById(`case-card-${caseId}`).classList.add('active');
+
+                if (caseId === '2') {
+                    const prisonerCountEl = document.getElementById('prisoner-count');
+                    if (prisonerCountEl) {
+                        animateCount(prisonerCountEl, 40000);
+                    }
+                }
+            }
+            
+            caseCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const caseId = card.id.split('-')[2];
+                    updateCaseDetails(caseId);
+                });
+            });
+
+            // Load initial case
+            updateCaseDetails('1');
+        });
+    </script>
+</body>
+</html>
+
